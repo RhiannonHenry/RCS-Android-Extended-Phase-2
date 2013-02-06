@@ -2,20 +2,16 @@ package org.gsm.rcsApp.activities;
 
 import java.io.UnsupportedEncodingException;
 
-import org.apache.http.auth.AuthScope;
 import org.apache.http.entity.StringEntity;
 import org.gsm.RCSDemo.R;
 import org.gsm.rcsApp.ServiceURL;
-import org.gsm.rcsApp.RCS.ChatMessage;
-import org.gsm.rcsApp.RCS.Contact;
-import org.gsm.rcsApp.RCS.ContactStateManager;
 import org.gsm.rcsApp.misc.RCSJsonHttpResponseHandler;
 import org.gsm.rcsApp.misc.Utils;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.loopj.android.http.AsyncHttpClient;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -27,11 +23,13 @@ import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
-import android.widget.ToggleButton;
 
+@SuppressLint("HandlerLeak")
 public class FileTransferActivity extends Activity{
 
+	@SuppressWarnings("unused")
 	private static Handler closeHandler = null;
+	@SuppressWarnings("unused")
 	private static Handler errorHandler = null;
 	static FileTransferActivity _instance = null;
 	String destinationUri;

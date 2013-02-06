@@ -2,7 +2,6 @@ package org.gsm.rcsApp.activities;
 
 import java.io.UnsupportedEncodingException;
 
-import org.apache.http.auth.AuthScope;
 import org.apache.http.entity.StringEntity;
 import org.gsm.rcsApp.ServiceURL;
 import org.gsm.rcsApp.RCS.ChatMessage;
@@ -143,7 +142,12 @@ public class ChatSessionActivity extends Activity implements Runnable {
 		}
 		viewIsVisible = false;
 		if (sentComposing) {
-			clearComposingIndicator();
+			try {
+				clearComposingIndicator();
+			} catch (UnsupportedEncodingException e) {
+				Log.d("ChatSessionActivity", "Authentication Error: clear composing indicator");
+			}
+			
 		}
 		MainActivity.chatSessionClosed(destinationUri);
 	}
@@ -168,7 +172,12 @@ public class ChatSessionActivity extends Activity implements Runnable {
 					sent.setContactUri(destinationUri);
 					contactState.storeMessage(sent);
 
-					sendAdhocMessage(trimmed, sent);
+					try {
+						sendAdhocMessage(trimmed, sent);
+					} catch (UnsupportedEncodingException e) {
+						Log.d("ChatSessionActivity", "Authentication Error: send adhoc message");
+					}
+					
 
 					messageHandler.sendEmptyMessage(0);
 				}
@@ -204,7 +213,7 @@ public class ChatSessionActivity extends Activity implements Runnable {
 	/*
 	 * sends a message in ad-hoc mode
 	 */
-	private void sendAdhocMessage(String message, ChatMessage chatMessage) {
+	private void sendAdhocMessage(String message, ChatMessage chatMessage) throws UnsupportedEncodingException {
 		try {
 			final String url = ServiceURL.sendAdhocIMMessageURL(
 					SplashActivity.userId, destinationUri);
@@ -224,10 +233,9 @@ public class ChatSessionActivity extends Activity implements Runnable {
 					+ "}";
 
 			AsyncHttpClient client = new AsyncHttpClient();
-//			AuthScope authscope = new AuthScope(ServiceURL.serverName,ServiceURL.serverPort, AuthScope.ANY_REALM);
-//			client.setBasicAuth(SplashActivity.userId,SplashActivity.appCredentialPassword, authscope);
 	        String auth = android.util.Base64.encodeToString((SplashActivity.appCredentialUsername+":"+SplashActivity.appCredentialPassword).getBytes("UTF-8"), android.util.Base64.NO_WRAP);
 			client.addHeader("Authorization", "Basic "+ auth);
+			client.addHeader("Accept", "application/json");
 			try {
 				StringEntity requestData = new StringEntity(jsonData);
 
@@ -308,7 +316,8 @@ public class ChatSessionActivity extends Activity implements Runnable {
 						lastSent = 0;
 					}
 				}
-			} catch (InterruptedException ie) {
+			} catch (InterruptedException ie) {} catch (UnsupportedEncodingException e) {
+				Log.d("ChatSessionActivity","Authentication Error: clear composing indicator");
 			}
 		}
 	}
@@ -325,11 +334,9 @@ public class ChatSessionActivity extends Activity implements Runnable {
 		JSONObject isComposing = new JSONObject();
 		try {
 			AsyncHttpClient client = new AsyncHttpClient();
-//			AuthScope authscope = new AuthScope(ServiceURL.serverName,ServiceURL.serverPort, AuthScope.ANY_REALM);
-//			client.setBasicAuth(SplashActivity.userId,SplashActivity.appCredentialPassword, authscope);
 	        String auth = android.util.Base64.encodeToString((SplashActivity.appCredentialUsername+":"+SplashActivity.appCredentialPassword).getBytes("UTF-8"), android.util.Base64.NO_WRAP);
 			client.addHeader("Authorization", "Basic "+ auth);
-			
+			client.addHeader("Accept","application/json");
 			isComposing.put("state", state);
 			isComposing.put("refresh", refresh);
 			isComposing.put("contentType", contentType);
@@ -363,7 +370,7 @@ public class ChatSessionActivity extends Activity implements Runnable {
 	/*
 	 * clear the isComposing indicator
 	 */
-	private void clearComposingIndicator() {
+	private void clearComposingIndicator() throws UnsupportedEncodingException {
 		sendComposingIndicator(SplashActivity.userId, destinationUri, "idle",
 				15, new java.util.Date(), "text/plain");
 		sentComposing = false;

@@ -3,7 +3,6 @@ package org.gsm.rcsApp.activities;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 
-import org.apache.http.auth.AuthScope;
 import org.apache.http.entity.StringEntity;
 import org.gsm.RCSDemo.R;
 import org.gsm.rcsApp.ServiceURL;
@@ -36,7 +35,6 @@ public class SplashActivity extends Activity {
 	
 	public static ArrayList<String> notificationSubscriptions=new ArrayList<String>();  
 	
-	
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -50,43 +48,22 @@ public class SplashActivity extends Activity {
 	
 		final TextView splashStatusIndicator=(TextView) findViewById(R.id.splashStatusIndicator);
 		splashStatusIndicator.setVisibility(View.VISIBLE);
-		splashStatusIndicator.setText("enter username / password");		
+		splashStatusIndicator.setText("enter username (mobile number)");		
 
-//		Authenticator.setDefault(new Authenticator()
-//		{
-//			protected PasswordAuthentication getPasswordAuthentication()
-//			{
-//				PasswordAuthentication pa = new PasswordAuthentication(SplashActivity.appCredentialUsername, SplashActivity.appCredentialPassword.toCharArray());
-//				return pa;
-//			}
-//		});
-		
         AsyncHttpClient client = new AsyncHttpClient();
-        
-        
-        
-//        client.getCredentialsProvider()
-//        
-//        client.getHttpClient().getCredentialsProvider().setCredentials(
-//                new AuthScope("localhost", 443), 
-//                new UsernamePasswordCredentials("username", "password"));
-//       
-//        client.setRealm(realm);
-//        client.setBasicAuth(SplashActivity.appCredentialUsername, SplashActivity.appCredentialPassword);
 
 		if (userId!=null) {
 			/*
 			 * De-register the previously logged in user
 			 */
 
-//	        AuthScope authscope=new AuthScope(ServiceURL.serverName, ServiceURL.serverPort, AuthScope.ANY_REALM);
-//	        client.setBasicAuth(userId, SplashActivity.appCredentialPassword, authscope);	        
 	        String auth;
 			try {
 				auth = android.util.Base64.encodeToString((SplashActivity.appCredentialUsername+":"+SplashActivity.appCredentialPassword).getBytes("UTF-8"), android.util.Base64.NO_WRAP);
 				client.addHeader("Authorization", "Basic "+ auth);
+				client.addHeader("Accept", "application/json");
 			} catch (UnsupportedEncodingException e) {
-				Log.e("SplashActivity", "Authentication Error: unregister user");
+				Log.e("SplashActivity","Authorization Failed: Failed to encode in Base64");
 			}
 	        
 	        final String url=ServiceURL.unregisterURL(userId);
@@ -132,22 +109,16 @@ public class SplashActivity extends Activity {
     
     public void proceedToMain(View view) throws UnsupportedEncodingException {
     	EditText splashUsernameInput=(EditText) findViewById(R.id.splashUsernameInput);
-		EditText splashPasswordInput=(EditText) findViewById(R.id.splashPasswordInput);
 		
 		final TextView splashStatusIndicator=(TextView) findViewById(R.id.splashStatusIndicator);
  
 		final String username=splashUsernameInput.getText().toString();
-
-		@SuppressWarnings("unused")
-		final String password=splashPasswordInput.getText().toString();
 		
 		splashStatusIndicator.setVisibility(View.INVISIBLE);
 		
 		if (username!=null && username.trim().length()>0) {
   
 	        AsyncHttpClient client = new AsyncHttpClient();
-//	        AuthScope authscope=new AuthScope(ServiceURL.serverName, ServiceURL.serverPort, AuthScope.ANY_REALM);
-//	        client.setBasicAuth(username, SplashActivity.appCredentialPassword, authscope);
 	        String auth = android.util.Base64.encodeToString((SplashActivity.appCredentialUsername+":"+SplashActivity.appCredentialPassword).getBytes("UTF-8"), android.util.Base64.NO_WRAP);
 	        final String url = ServiceURL.registerURL(username);
 	        Log.d("SplashActivity","Username = "+SplashActivity.appCredentialUsername);
@@ -155,28 +126,23 @@ public class SplashActivity extends Activity {
 	        Log.d("SplashActivity","URL = "+url);
 	        
 	        client.addHeader("Authorization", "Basic "+ auth);
+	        client.addHeader("Accept", "application/json");
+			client.addHeader("Content-Type", "application/json");
 	        client.post(url, new RCSJsonHttpResponseHandler() {
 		        boolean successReceived=false;
 
 	        	@Override
 	            public void onSuccess(String response, int responseCode) throws UnsupportedEncodingException {
 	        		Log.d("SplashActivity", "proceedToMain::success status="+responseCode);
-	                if (responseCode==204)
-						try {
-							{
-								userId=username;
-								registerForNotifications();
-							  	Intent intent = new Intent(_instance, MainActivity.class);
-								successReceived=true;
-								startActivity(intent);
-							}
-						} catch (Exception e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-					else if (responseCode==401) {
+	                if (responseCode==204){
+						userId=username;
+						registerForNotifications();
+						Intent intent = new Intent(_instance, MainActivity.class);
+						successReceived=true;
+						startActivity(intent);
+					} else if (responseCode==401) {
 		    			splashStatusIndicator.setVisibility(View.VISIBLE);
-		    			splashStatusIndicator.setText("invalid username / password");			            	
+		    			splashStatusIndicator.setText("invalid username (mobile number)");			            	
 		            	successReceived=true;
 	                }
 	            }
@@ -208,23 +174,16 @@ public class SplashActivity extends Activity {
 	        });
 		} else {
 			splashStatusIndicator.setVisibility(View.VISIBLE);
-			splashStatusIndicator.setText("enter username / password");		
+			splashStatusIndicator.setText("enter username (mobile number)");		
 		}
 
     }
     
     private void registerForNotifications() throws UnsupportedEncodingException {
         AsyncHttpClient client = new AsyncHttpClient();
-//        AuthScope authscope=new AuthScope(ServiceURL.serverName, ServiceURL.serverPort, AuthScope.ANY_REALM);
-//        client.setBasicAuth(SplashActivity.userId, SplashActivity.appCredentialPassword, authscope);        
         String auth = android.util.Base64.encodeToString((SplashActivity.appCredentialUsername+":"+SplashActivity.appCredentialPassword).getBytes("UTF-8"), android.util.Base64.NO_WRAP);
         final String url=ServiceURL.createNotificationChannelURL(userId);
         String jsonData="{\"notificationChannel\": {\"applicationTag\": \"myApp\", \"channelData\": {\"maxNotifications\": \"3\", \"type\": \"LongPollingData\"}, \"channelLifetime\": \"20\", \"channelType\": \"LongPolling\", \"clientCorrelator\": \"123\"}}";
-        try {
-			JSONObject body = new JSONObject(jsonData);
-		} catch (JSONException e1) {
-			Log.e("SplashActivity", "Error converting Request Body");
-		}
         Log.d("SplashActivity", "register for notifications: URL = "+url);
         
         try {
@@ -286,10 +245,9 @@ public class SplashActivity extends Activity {
 			Log.d("SplashActivity", "Subscription request data = "+jsonData);
 			
 			AsyncHttpClient client = new AsyncHttpClient();
-//	        AuthScope authscope=new AuthScope(ServiceURL.serverName, ServiceURL.serverPort, AuthScope.ANY_REALM);
-//	        client.setBasicAuth(SplashActivity.userId, SplashActivity.appCredentialPassword, authscope); 
 			String auth = android.util.Base64.encodeToString((SplashActivity.appCredentialUsername+":"+SplashActivity.appCredentialPassword).getBytes("UTF-8"), android.util.Base64.NO_WRAP);
 			client.addHeader("Authorization", "Basic "+ auth);
+			client.addHeader("Accept", "application/json");
 			final String url = ServiceURL.createFileTransferSubscriptionURL(userId);
 	        
 	        try {
@@ -330,10 +288,9 @@ public class SplashActivity extends Activity {
 			Log.d("SplashActivity", "Subscription request data = "+jsonData);
 			
 	        AsyncHttpClient client = new AsyncHttpClient();
-//	        AuthScope authscope=new AuthScope(ServiceURL.serverName, ServiceURL.serverPort, AuthScope.ANY_REALM);
-//	        client.setBasicAuth(SplashActivity.userId, SplashActivity.appCredentialPassword, authscope);        
 	        String auth = android.util.Base64.encodeToString((SplashActivity.appCredentialUsername+":"+SplashActivity.appCredentialPassword).getBytes("UTF-8"), android.util.Base64.NO_WRAP);
 			client.addHeader("Authorization", "Basic "+ auth);
+			client.addHeader("Accept", "application/json");
 			
 	        final String url=ServiceURL.createAddressBookChangeSubscriptionURL(userId);
 	        try {
@@ -369,10 +326,9 @@ public class SplashActivity extends Activity {
 			Log.d("SplashActivity", "Subscription request data = "+jsonData);
 			
 	        AsyncHttpClient client = new AsyncHttpClient();
-//	        AuthScope authscope=new AuthScope(ServiceURL.serverName, ServiceURL.serverPort, AuthScope.ANY_REALM);
-//	        client.setBasicAuth(SplashActivity.userId, SplashActivity.appCredentialPassword, authscope);        
 	        String auth = android.util.Base64.encodeToString((SplashActivity.appCredentialUsername+":"+SplashActivity.appCredentialPassword).getBytes("UTF-8"), android.util.Base64.NO_WRAP);
 			client.addHeader("Authorization", "Basic "+ auth);
+			client.addHeader("Accept", "application/json");
 			
 	        final String url=ServiceURL.createSessionChangeSubscriptionURL(userId);
 	        try {

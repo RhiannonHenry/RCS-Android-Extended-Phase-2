@@ -9,7 +9,6 @@ import java.util.HashMap;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
-import org.apache.http.auth.AuthScope;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
@@ -205,10 +204,9 @@ public class MainActivity extends Activity implements Runnable {
 
 		if (SplashActivity.userId != null) {
 			AsyncHttpClient client = new AsyncHttpClient();
-//			AuthScope authscope = new AuthScope(ServiceURL.serverName, ServiceURL.serverPort, AuthScope.ANY_REALM);
-//			client.setBasicAuth(SplashActivity.userId, SplashActivity.appCredentialPassword, authscope);
 	        String auth = android.util.Base64.encodeToString((SplashActivity.appCredentialUsername+":"+SplashActivity.appCredentialPassword).getBytes("UTF-8"), android.util.Base64.NO_WRAP);
 			client.addHeader("Authorization", "Basic "+ auth);
+			client.addHeader("Accept", "application/json");
 			client.get(url, new RCSJsonHttpResponseHandler() {
 				@Override
 				public void onSuccess(JSONObject response, int errorCode) {
@@ -259,9 +257,6 @@ public class MainActivity extends Activity implements Runnable {
 												}
 
 											}
-											// String icon=contact.getString("icon");
-											// String status=contact.getString("status");
-
 											ContactState cs = contactStateManager
 													.getOrCreateContactState(contactId);
 
@@ -270,8 +265,6 @@ public class MainActivity extends Activity implements Runnable {
 											contactRecord.setResourceURL(resourceURL);
 											contactRecord.setDisplayName(displayName);
 											contactRecord.setCapabilities(capabilities);
-											// contactRecord.setIcon(icon);
-											// contactRecord.setStatus(status);
 											contactRecord.setHasNewMessage(cs.isNewMessage());
 
 											retrievedContacts.add(contactRecord);
@@ -331,6 +324,7 @@ public class MainActivity extends Activity implements Runnable {
 					httppost.addHeader("Content-Type", "application/json");
 					httppost.addHeader("accept", "application/json");
 					response = client.execute(httppost);
+					Log.i("MainActivity","Response = "+response);
 				} catch (java.net.SocketTimeoutException ste) {
 					Log.d("MainActivity", "SocketTimeout handled");
 				} catch (ClientProtocolException e) {
@@ -357,14 +351,13 @@ public class MainActivity extends Activity implements Runnable {
 						processNotificationResponse(statusCode, jsonData);
 					} catch (JSONException e) {
 						Log.d("MainActivity", "JSONException handled");
-						Log.d("MainActivity",
-								"HERE: run() processNotificationResponse");
 					} catch (UnsupportedEncodingException e) {
 						Log.e("MainActivity", "Authentication Error: process notification response");
 					}
 				}
 
 			} else {
+				Log.e("MainActivity","Notifications URL is null OR makeRequest is false");
 				try {
 					Thread.yield();
 					Thread.sleep(1000); // milliseconds
@@ -442,6 +435,7 @@ public class MainActivity extends Activity implements Runnable {
 						AsyncHttpClient responseClient = new AsyncHttpClient();
 				        String auth = android.util.Base64.encodeToString((SplashActivity.appCredentialUsername+":"+SplashActivity.appCredentialPassword).getBytes("UTF-8"), android.util.Base64.NO_WRAP);
 						responseClient.addHeader("Authorization", "Basic "+ auth);
+						responseClient.addHeader("Accept", "application/json");
 						final String responseURL = url;
 						Log.d("MainActivity", "Sending message status update "+ responseURL + " with " + jsonData);
 
@@ -483,10 +477,9 @@ public class MainActivity extends Activity implements Runnable {
 							if ("ParticipantSessionStatus".equals(rel)
 									&& href != null) {
 								AsyncHttpClient acceptClient = new AsyncHttpClient();
-//								AuthScope authscope = new AuthScope(ServiceURL.serverName,ServiceURL.serverPort,AuthScope.ANY_REALM);
-//								acceptClient.setBasicAuth(SplashActivity.userId,SplashActivity.appCredentialPassword,authscope);
 						        String auth = android.util.Base64.encodeToString((SplashActivity.appCredentialUsername+":"+SplashActivity.appCredentialPassword).getBytes("UTF-8"), android.util.Base64.NO_WRAP);
 								acceptClient.addHeader("Authorization", "Basic "+ auth);
+								acceptClient.addHeader("Accept", "application/json");
 								try {
 									StringEntity requestData = new StringEntity(
 											"{\"participantSessionStatus\":{\"status\":\"Connected\"}}");

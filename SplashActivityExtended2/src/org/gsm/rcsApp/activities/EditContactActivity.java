@@ -2,7 +2,6 @@ package org.gsm.rcsApp.activities;
 
 import java.io.UnsupportedEncodingException;
 
-import org.apache.http.auth.AuthScope;
 import org.apache.http.entity.StringEntity;
 import org.gsm.rcsApp.ServiceURL;
 import org.gsm.rcsApp.RCS.Contact;
@@ -91,11 +90,9 @@ import org.gsm.RCSDemo.R;
 			displayNameAttribute.put("value", newDisplayName);
 
 	        AsyncHttpClient client = new AsyncHttpClient();
-//	        AuthScope authscope=new AuthScope(ServiceURL.serverName, ServiceURL.serverPort, AuthScope.ANY_REALM);
-//	        client.setBasicAuth(SplashActivity.userId, SplashActivity.appCredentialPassword, authscope);        
 	        String auth = android.util.Base64.encodeToString((SplashActivity.appCredentialUsername+":"+SplashActivity.appCredentialPassword).getBytes("UTF-8"), android.util.Base64.NO_WRAP);
 			client.addHeader("Authorization", "Basic "+ auth);
-			
+			client.addHeader("Accept", "application/json");
 	        String jsonData="{\"contact\":"+contact.toString()+"}";
 	        
 			StringEntity requestData=new StringEntity(jsonData);
@@ -133,11 +130,9 @@ import org.gsm.RCSDemo.R;
         final String deleteurl=ServiceURL.getDeleteContactURL(SplashActivity.userId, contactUri);
         
         AsyncHttpClient client = new AsyncHttpClient();
-//        AuthScope authscope=new AuthScope(ServiceURL.serverName, ServiceURL.serverPort, AuthScope.ANY_REALM);
-//        client.setBasicAuth(SplashActivity.userId, SplashActivity.appCredentialPassword, authscope);        
         String auth = android.util.Base64.encodeToString((SplashActivity.appCredentialUsername+":"+SplashActivity.appCredentialPassword).getBytes("UTF-8"), android.util.Base64.NO_WRAP);
 		client.addHeader("Authorization", "Basic "+ auth);
-		
+		client.addHeader("Accept", "application/json");
         RCSJsonHttpResponseHandler deleterequestHandler=new RCSJsonHttpResponseHandler() {
         	public void onSuccess(String response, int statusCode) {
         		Log.d("EditContactActivity", "Delete response is "+statusCode+" "+response);

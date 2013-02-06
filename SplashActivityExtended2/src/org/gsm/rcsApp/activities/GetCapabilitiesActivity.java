@@ -1,7 +1,6 @@
 package org.gsm.rcsApp.activities;
 
 import java.io.UnsupportedEncodingException;
-import org.apache.http.auth.AuthScope;
 import org.apache.http.entity.StringEntity;
 import org.gsm.RCSDemo.R;
 import org.gsm.rcsApp.ServiceURL;
@@ -12,6 +11,7 @@ import org.json.JSONObject;
 
 import com.loopj.android.http.AsyncHttpClient;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
@@ -22,8 +22,11 @@ import android.view.View;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
+@SuppressLint("HandlerLeak")
 public class GetCapabilitiesActivity extends Activity {
+	@SuppressWarnings("unused")
 	private static Handler closeHandler = null;
+	@SuppressWarnings("unused")
 	private static Handler errorHandler = null;
 	private String address;
 	private boolean im_session = false;

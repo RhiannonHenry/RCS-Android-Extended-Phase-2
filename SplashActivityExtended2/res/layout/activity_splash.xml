@@ -57,28 +57,7 @@
 
         <requestFocus />
     </EditText>
-    
-    <TextView
-        android:id="@+id/splashPasswordPrompt"
-        android:layout_width="120dip"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_below="@+id/splashUsernamePrompt"
-        android:text="Password"
-        android:layout_marginTop="30dip"
-        android:layout_marginLeft="10dip"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
-
-    <EditText
-        android:id="@+id/splashPasswordInput"
-        android:layout_width="160dp"
-        android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/splashPasswordPrompt"
-        android:layout_alignBottom="@+id/splashPasswordPrompt"
-        android:layout_toRightOf="@+id/splashPasswordPrompt"
-        android:ems="10"
-        android:inputType="textPassword" />
-    
+       
     <Button
         android:id="@+id/splashProceedButton"
         android:layout_width="120dp"

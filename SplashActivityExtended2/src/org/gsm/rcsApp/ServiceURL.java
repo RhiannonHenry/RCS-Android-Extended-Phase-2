@@ -7,7 +7,6 @@ public class ServiceURL {
 	public static final String serverName="rcs.oneapi-gw.gsma.com";
 	public static final int serverPort=80;
 	
-//	private static String sitebase="http://"+serverName;
 	private static String sitebase="https://"+serverName;
 	private static String baseURLGW=sitebase+"/";
 	

@@ -68,6 +68,7 @@ public class RCSJsonHttpResponseHandler extends AsyncHttpResponseHandler {
      * Fired when a request returns successfully, override to handle in your own code
      * @param content the body of the HTTP response from the server
      * @throws UnsupportedEncodingException 
+     * @throws JSONException 
      */
     public void onSuccess(String content, int responseCode) throws UnsupportedEncodingException {
     	System.out.println("Default onSuccess for responseCode "+responseCode);
@@ -75,7 +76,7 @@ public class RCSJsonHttpResponseHandler extends AsyncHttpResponseHandler {
     public void onSuccess(JSONObject content, int responseCode) throws UnsupportedEncodingException {
     	System.out.println("JSONObject onSuccess for responseCode "+responseCode);
     }
-    public void onSuccess(JSONArray content, int responseCode) {
+    public void onSuccess(JSONArray content, int responseCode) throws UnsupportedEncodingException {
     	System.out.println("JSONArray onSuccess for responseCode "+responseCode);
     }
 
@@ -101,12 +102,12 @@ public class RCSJsonHttpResponseHandler extends AsyncHttpResponseHandler {
     public void onFailure(Throwable error, JSONObject content, int responseCode) {
         // By default, call the deprecated onFailure(Throwable) for compatibility
         onFailure(error);
-    	System.out.println("JSONObject onFailure for responseCode "+responseCode);
+    	System.out.println("JSONObject onFailure for responseCode "+responseCode+" content="+content.toString());
     }
     public void onFailure(Throwable error, JSONArray content, int responseCode) {
         // By default, call the deprecated onFailure(Throwable) for compatibility
         onFailure(error);
-    	System.out.println("JSONArray onFailure for responseCode "+responseCode);
+    	System.out.println("JSONArray onFailure for responseCode "+responseCode+" array="+content.toString());
     }
     
 
@@ -140,7 +141,7 @@ public class RCSJsonHttpResponseHandler extends AsyncHttpResponseHandler {
     // Pre-processing of messages (in original calling thread, typically the UI thread)
     //
 
-    protected void handleSuccessMessage(String responseBody, int responseCode) throws UnsupportedEncodingException {
+    protected void handleSuccessMessage(String responseBody, int responseCode) throws UnsupportedEncodingException, JSONException {
         try {
             if (responseBody != null) {
                 Object jsonResponse = parseResponse(responseBody);
@@ -200,6 +201,8 @@ public class RCSJsonHttpResponseHandler extends AsyncHttpResponseHandler {
 				handleSuccessMessage((String)msg.obj, msg.arg1);
 			} catch (UnsupportedEncodingException e) {
 				Log.d("HTTPResponseHandler", "Authentication Error: handle success message");
+			} catch (JSONException e) {
+				Log.e("SplashActivity", "Error converting JSON body for create notification channel");
 			}
                 break;
             case FAILURE_MESSAGE:
