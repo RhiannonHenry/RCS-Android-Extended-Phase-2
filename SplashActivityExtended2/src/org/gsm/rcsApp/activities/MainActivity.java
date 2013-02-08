@@ -637,8 +637,11 @@ public class MainActivity extends Activity implements Runnable {
 						Log.d("MainActivity", "File Information = "+ fileInformation);
 						String attachmentURL = Utils.getJSONStringElement(fileInformation, "fileURL");
 						Log.d("MainActivity", "Attachment URL = "+ attachmentURL);
-						// Open up the URL in device browser and downloan file.
-						Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(attachmentURL));
+						// Open up the URL in device browser and download file.
+						String url = "http://caterpillar:8299/remoteTestChunkedOnNoBridging";
+						//TODO: Change this back...
+						Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+//						Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(attachmentURL));
 						startActivity(browserIntent);
 					}
 			}
