@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
@@ -36,12 +37,15 @@ public class AsyncTaskDownloadActivity extends Activity {
 		txt_percentage = (TextView) findViewById(R.id.txt_percentage);
 		ShowDialogAsyncTask task = new ShowDialogAsyncTask();
 		Intent intent = getIntent();
-		String params = (String)intent.getExtras().getString("FILE_NAME");
-		Log.d("AsyncTaskDownload", "File Name: "+params);
-		task.execute(params);
+		String fileName = (String) intent.getExtras().getString("FILE_NAME");
+		String attachmentURL = (String) intent.getExtras().getString("ATTACHMENT_URL");
+		Log.d("AsyncTaskDownload", "File Name: " + fileName);
+		Log.d("AsyncTaskDownload", "URL: " + attachmentURL);
+		task.execute(fileName, attachmentURL);
 	}
 
-	private class ShowDialogAsyncTask extends AsyncTask<String, Integer, String> {
+	private class ShowDialogAsyncTask extends
+			AsyncTask<String, Integer, String> {
 
 		int progress_status;
 
@@ -49,61 +53,88 @@ public class AsyncTaskDownloadActivity extends Activity {
 		protected void onPreExecute() {
 			// update the UI immediately after the task is executed
 			super.onPreExecute();
-			Toast.makeText(AsyncTaskDownloadActivity.this, "Starting download...",
-					Toast.LENGTH_SHORT).show();
+			Toast.makeText(AsyncTaskDownloadActivity.this,
+					"Starting download...", Toast.LENGTH_SHORT).show();
 			progress_status = 0;
 			txt_percentage.setText("downloading 0%");
 
 		}
 
 		@Override
-		protected String doInBackground(String ...params) {
+		protected String doInBackground(String... params) {
+			//String endpoint = "http://28c51ebaaadfd10114b406e01025adde:O$wyL,4S@hanoi:8181/services/repo/user/ObtainUserFile?username=%2B441110000002&filename=tux1358850990171.png";
+			
 			String fileName = params[0];
+			String attachmentURL = params[1];
 			String response = null;
-			int count = 0;
 			try {
-				//Add comment
-				URL url = new URL("http://28c51ebaaadfd10114b406e01025adde:O$wyL,4S@hanoi:8181/services/repo/user/ObtainUserFile?username=%2B441110000002&filename=tux1358850990171.png");
+				String auth = android.util.Base64.encodeToString((SplashActivity.appCredentialUsername+":"+SplashActivity.appCredentialPassword).getBytes("UTF-8"), android.util.Base64.NO_WRAP);
+				URL url = new URL(attachmentURL);
 				URLConnection urlConnection = url.openConnection();
-				urlConnection.connect();
-				Log.d("AsyncTaskDownload", "Connected to URL: "+url.toString());
-				int length = urlConnection.getContentLength();
-				Log.d("AsyncTaskDownload","File size = "+length);
-				Log.d("AsyncTaskDownload","Content Type = "+urlConnection.getContentType());
-				Log.d("AsyncTaskDownload","Authentication = "+urlConnection.getHeaderField("Authorization"));
-				// download the file
-                InputStream input = new BufferedInputStream(url.openStream(), 8192);
-				File SDCardRoot = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+				urlConnection.setRequestProperty("Authorization", "Basic " + auth);
+				//InputStream reader = url.openStream();
+				InputStream reader = urlConnection.getInputStream();
+				Log.d("AsyncTaskDownload","Connected to URL: " + url.toString());
+				int fileSize = getHeaderDetails(attachmentURL);
+				File SDCardRoot = Environment
+						.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
 				SDCardRoot.mkdirs();
-				Log.d("AsyncTaskDownload","Saving file to path: "+SDCardRoot.getAbsolutePath());
-				File file = new File(SDCardRoot,fileName);
+				Log.d("AsyncTaskDownload",
+						"Saving file to path: " + SDCardRoot.getAbsolutePath());
+				File file = new File(SDCardRoot, fileName);
 				FileOutputStream output = new FileOutputStream(file);
-				
+
 				byte[] data = new byte[1024];
-		        long total = 0;
-		        
-		        
-		        while ( (count = input.read(data)) != -1) {  
-		                total += count;
-		                progress_status = (int)((total*100)/length);
-                		publishProgress(progress_status);
-		                output.write(data, 0, count);
-		                
-		        }
-		        Log.d("AsyncTaskDownload","File Received...");
-		        response =  "Success";
-		        output.close();
+
+				int count = 0;
+				long totalDownloaded = 0;
+				while ((count = reader.read(data)) > 0) {
+					Log.d("AsyncTaskDownload", "Current count = " + count);
+					totalDownloaded += count;
+					progress_status = (int) ((totalDownloaded / fileSize) * 100);
+					publishProgress(progress_status);
+					output.write(data, 0, count);
+
+				}
+				Log.d("AsyncTaskDownload", "File Received...");
+				response = "Success";
+				output.close();
 			} catch (MalformedURLException e) {
-				response =  "Failure";
-		        Log.e("AsyncTaskDownload", "MalformedURLException:: when attempting to download attachment");
+				response = "Failure";
+				Log.e("AsyncTaskDownload",
+						"MalformedURLException:: when attempting to download attachment");
 				e.printStackTrace();
 			} catch (IOException e) {
-				response =  "Failure";
-				 Log.e("AsyncTaskDownload", "IOException:: when attempting to download attachment");
-			     e.printStackTrace();   
+				response = "Failure";
+				Log.e("AsyncTaskDownload",
+						"IOException:: when attempting to download attachment");
+				e.printStackTrace();
 			}
-			Log.d("AsyncTaskDownload","***Response*** = "+response);
+			Log.d("AsyncTaskDownload", "***Response*** = " + response);
 			return response;
+		}
+
+		private int getHeaderDetails(String endpoint) throws IOException {
+			// TODO Auto-generated method stub
+			URL url = new URL(endpoint);
+			HttpURLConnection yc = (HttpURLConnection) url.openConnection();
+			int fileSize = 0;
+
+			try {
+				// retrieve file size from Content-Length header field
+				if (yc.getContentLength() >0){
+					fileSize = yc.getContentLength();
+				}else{
+					fileSize=1;
+				}
+				
+			} catch (NumberFormatException nfe) {
+				Log.e("AsyncTaskDownload", "Error:: error getting the content length");
+			}
+			Log.d("AsyncTaskDownload", "Content Length: "+fileSize);
+			Log.d("AsyncTaskDownload", "Auth: "+yc.getHeaderField("Authorization"));
+			return fileSize;
+
 		}
 
 		@Override
