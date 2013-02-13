@@ -55,4 +55,7 @@
     <string name="optionText">Choose an option:</string>
     <string name="acceptOption">Accept</string>
     <string name="declineOption">Decline</string>
+    <string name="async_task">Downloading File&#8230;</string>
+    <string name="start_btn">Start</string>
+    <string name="downloading_txt">Dowloading 0%</string>
 </resources>

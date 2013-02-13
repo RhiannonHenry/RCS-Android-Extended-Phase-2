@@ -34,7 +34,6 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -635,14 +634,56 @@ public class MainActivity extends Activity implements Runnable {
 						Log.d("MainActivity", "File Notification = "+ fileNotification);
 						JSONObject fileInformation = Utils.getJSONObject(fileNotification,"fileInformation");
 						Log.d("MainActivity", "File Information = "+ fileInformation);
+						JSONObject fileSelector =  Utils.getJSONObject(fileInformation,"fileSelector");
+						String fileName = Utils.getJSONStringElement(fileSelector, "name");
+						Log.d("MainActivity", "File Name = "+ fileName);
 						String attachmentURL = Utils.getJSONStringElement(fileInformation, "fileURL");
 						Log.d("MainActivity", "Attachment URL = "+ attachmentURL);
+						
+						Log.d("MainActivity", "About to DOWNLOAD IMAGE........");
+						Intent intent = new Intent(_instance,AsyncTaskDownloadActivity.class);
+						intent.putExtra("FILE_NAME", fileName);
+						Log.d("MainAcitivty","Retrieve Download:: starting intent...");
+						startActivity(intent);
 						// Open up the URL in device browser and download file.
-						String url = "http://caterpillar:8299/remoteTestChunkedOnNoBridging";
-						//TODO: Change this back...
-						Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-//						Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(attachmentURL));
-						startActivity(browserIntent);
+//						try {
+//							String auth = android.util.Base64.encodeToString((SplashActivity.appCredentialUsername+":"+SplashActivity.appCredentialPassword).getBytes("UTF-8"), android.util.Base64.NO_WRAP);
+//							//URL url = new URL(attachmentURL);
+//							URL url = new URL("http://28c51ebaaadfd10114b406e01025adde:O$wyL,4S@hanoi:8181/services/repo/user/ObtainUserFile?username=%2B441110000002&filename=tux1358850990171.png");
+//							URLConnection urlConnection = url.openConnection();
+//							//urlConnection.setRequestProperty("Authorization", "Basic "+auth);
+//							urlConnection.setDoOutput(true);
+//							urlConnection.connect();
+//							Log.d("MainActivity", "Connected to URL: "+url.toString());
+//							File SDCardRoot = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+//							SDCardRoot.mkdirs();
+//							Log.d("MainActivity","Saving file to path: "+SDCardRoot.getAbsolutePath());
+//							File file = new File(SDCardRoot,fileName);
+//							FileOutputStream fileOutput = new FileOutputStream(file);
+//							InputStream inputStream = urlConnection.getInputStream();
+//							
+//							byte[] buffer = new byte[1024];
+//					        int bufferLength = 0; 
+//
+//					        while ( (bufferLength = inputStream.read(buffer)) > 0) {  
+//					                fileOutput.write(buffer, 0, bufferLength);
+//					        }
+//					        Log.d("MainActivity","File Received...");
+//					        fileOutput.close();
+//						} catch (MalformedURLException e) {
+//					        Log.e("MainActivity", "MalformedURLException:: when attempting to download attachment");
+//							e.printStackTrace();
+//						} catch (IOException e) {
+//							 Log.e("MainActivity", "IOException:: when attempting to download attachment");
+//						     e.printStackTrace();
+//						}
+
+//						String url = "http://28c51ebaaadfd10114b406e01025adde:O$wyL,4S@hanoi:8181/services/repo/user/ObtainUserFile?username=%2B441110000002&filename=tux1358850990171.png";
+//						//String url = "http://caterpillar:8299/remoteTestChunkedOnNoBridging";
+//						//TODO: Change this back...
+//						Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+////						Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(attachmentURL));
+//						startActivity(browserIntent);
 					}
 			}
 		}
