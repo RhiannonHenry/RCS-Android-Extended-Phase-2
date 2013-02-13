@@ -637,6 +637,8 @@ public class MainActivity extends Activity implements Runnable {
 						JSONObject fileSelector =  Utils.getJSONObject(fileInformation,"fileSelector");
 						String fileName = Utils.getJSONStringElement(fileSelector, "name");
 						Log.d("MainActivity", "File Name = "+ fileName);
+						String size = Utils.getJSONStringElement(fileSelector, "size");
+						Log.d("MainActivity", "File Size = "+ size);
 						String attachmentURL = Utils.getJSONStringElement(fileInformation, "fileURL");
 						Log.d("MainActivity", "Attachment URL = "+ attachmentURL);
 						
@@ -644,6 +646,7 @@ public class MainActivity extends Activity implements Runnable {
 						Intent intent = new Intent(_instance,AsyncTaskDownloadActivity.class);
 						intent.putExtra("FILE_NAME", fileName);
 						intent.putExtra("ATTACHMENT_URL", attachmentURL);
+						intent.putExtra("FILE_SIZE", size);
 						Log.d("MainAcitivty","Retrieve Download:: starting intent...");
 						startActivity(intent);
 						// Open up the URL in device browser and download file.

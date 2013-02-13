@@ -39,9 +39,11 @@ public class AsyncTaskDownloadActivity extends Activity {
 		Intent intent = getIntent();
 		String fileName = (String) intent.getExtras().getString("FILE_NAME");
 		String attachmentURL = (String) intent.getExtras().getString("ATTACHMENT_URL");
+		String size = (String) intent.getExtras().getString("FILE_SIZE");
 		Log.d("AsyncTaskDownload", "File Name: " + fileName);
 		Log.d("AsyncTaskDownload", "URL: " + attachmentURL);
-		task.execute(fileName, attachmentURL);
+		Log.d("AsyncTaskDownload", "File Size: " + size);
+		task.execute(fileName, attachmentURL, size);
 	}
 
 	private class ShowDialogAsyncTask extends
@@ -66,6 +68,7 @@ public class AsyncTaskDownloadActivity extends Activity {
 			
 			String fileName = params[0];
 			String attachmentURL = params[1];
+			String size = params[2];
 			String response = null;
 			try {
 				String auth = android.util.Base64.encodeToString((SplashActivity.appCredentialUsername+":"+SplashActivity.appCredentialPassword).getBytes("UTF-8"), android.util.Base64.NO_WRAP);
@@ -75,7 +78,7 @@ public class AsyncTaskDownloadActivity extends Activity {
 				//InputStream reader = url.openStream();
 				InputStream reader = urlConnection.getInputStream();
 				Log.d("AsyncTaskDownload","Connected to URL: " + url.toString());
-				int fileSize = getHeaderDetails(attachmentURL);
+				double fileSize = Double.parseDouble(size);
 				File SDCardRoot = Environment
 						.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
 				SDCardRoot.mkdirs();
@@ -87,11 +90,14 @@ public class AsyncTaskDownloadActivity extends Activity {
 				byte[] data = new byte[1024];
 
 				int count = 0;
-				long totalDownloaded = 0;
+				double totalDownloaded = 0;
 				while ((count = reader.read(data)) > 0) {
-					Log.d("AsyncTaskDownload", "Current count = " + count);
 					totalDownloaded += count;
-					progress_status = (int) ((totalDownloaded / fileSize) * 100);
+					Log.d("AsyncTaskDownload","Total Downloaded: "+totalDownloaded);
+					double percentage = (totalDownloaded/fileSize)*100;
+					Log.d("AsyncTaskDownload","****************************************** "+percentage);
+					progress_status = (int)percentage;
+					Log.d("AsyncTaskDownload", "Progress Status = " + progress_status);
 					publishProgress(progress_status);
 					output.write(data, 0, count);
 
