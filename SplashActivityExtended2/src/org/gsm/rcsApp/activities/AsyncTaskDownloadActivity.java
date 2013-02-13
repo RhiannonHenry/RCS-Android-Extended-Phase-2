@@ -62,6 +62,7 @@ public class AsyncTaskDownloadActivity extends Activity {
 			String response = null;
 			int count = 0;
 			try {
+				//Add comment
 				URL url = new URL("http://28c51ebaaadfd10114b406e01025adde:O$wyL,4S@hanoi:8181/services/repo/user/ObtainUserFile?username=%2B441110000002&filename=tux1358850990171.png");
 				URLConnection urlConnection = url.openConnection();
 				urlConnection.connect();
